@@ -17,7 +17,6 @@ geometric(x, p) = (1 - p)^(x - 1) * p
 
 c = maximum([poisson(x, l) / geometric(x, p) for x in 1:2l])
 
-# TODO: Wektoryzacja 
 function accept_reject(p, l)
 
 
@@ -37,18 +36,16 @@ function accept_reject_vectorized(p, l, size)
 
     prev_filled_count = 0
     filled_count      = 0
-    N                 = size
 
-    while filled_count < N
+    while filled_count < size
 
-        x = rand(Geometric(p), N)
+        x = rand(Geometric(p), size - filled_count)
         
         # Filtr wskazujący na wartości do zaakceptowania w aktualnej iteracji
-        mask = c .* rand(N) .* geometric.(x, p) .<= poisson.(x, l)
+        mask = c .* rand(size - filled_count) .* geometric.(x, p) .<= poisson.(x, l)
 
         filled_now    = sum(mask)
         filled_count += filled_now
-        N            -= filled_now
 
         result[1+prev_filled_count:filled_count] = x[mask][1:filled_count-prev_filled_count]
         prev_filled_count = filled_count
@@ -60,9 +57,9 @@ function accept_reject_vectorized(p, l, size)
 end
 
 @btime [accept_reject(p, l) for _ in 1:100_000]
-@btime accept_reject_vectorized(p, l, 100_000)
+samples = accept_reject_vectorized(p, l, 100_000)
 
 
-histogram(samples, normalize=:pdf)
+histogram(samples, normalize=:probability)
 
 pvalue(ExactOneSampleKSTest(samples, Poisson(l)), tail=:right)
