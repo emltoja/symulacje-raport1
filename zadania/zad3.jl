@@ -73,7 +73,7 @@ function ziggurat(N)
     samples
 end
 
-@btime ziggurat(1_000_000)
+@btime ziggurat(1_000_000) 
 abs_norm_samples = ziggurat(10000)
 samples = vcat(abs_norm_samples, -1 .* abs_norm_samples)
 
