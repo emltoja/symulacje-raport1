@@ -90,29 +90,6 @@ intervals, extr = steps_2(30)
 @btime ziggurat(1_000_000, intervals, extr)
 @btime accept_reject(1_000_000)
 
-# times = Vector{Float64}(undef, 99)
-# res   = 2:100
-
-# for i in res
-#     intervals, extr = steps_2(i)
-#     meant = 0
-#     for _ in 1:10
-#         t = time_ns()
-#         ziggurat(1_000, intervals, extr) 
-#         meant += time_ns() - t
-#     end
-#     times[i - 1] = meant/10
-# end
-
-# scatter(res, times[2:end])
-
-
-
-
-
-
-
-
 
 abs_norm_samples = ziggurat(10000, intervals, extr)
 samples = vcat(abs_norm_samples, -1 .* abs_norm_samples)
