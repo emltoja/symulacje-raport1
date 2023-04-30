@@ -7,11 +7,8 @@ using BenchmarkTools
 p = 1/2
 l = 2
 
-# Podczas generowania próbek o dużej długości od pewnego momentu dochodziło do zwracania 
-# nadzwyczajnie dużych liczb (na przykład ciąg  1667017767313, 110544 ,1667017767345, 110544). Po konwersji 
-# zwracanej wartości przez funkcję poisson z Float64 na BigFloat problem zniknął. Nie doszło jednakże do 
-# spadku wydajności generowania zmiennych.
-poisson(x, l)   = BigFloat(ℯ^-l * l^x / factorial(big(x)))
+
+poisson(x, l)   = ℯ^-l * l^x / factorial(big(x))
 
 geometric(x, p) = (1 - p)^(x - 1) * p 
 
@@ -34,32 +31,33 @@ function accept_reject_vectorized(p, l, size)
 
     result = Vector{Int64}(undef, size)
 
-    prev_filled_count = 0
-    filled_count      = 0
+    for i in 1:size
 
-    while filled_count < size
-
-        x = rand(Geometric(p), size - filled_count)
+        x = rand(Geometric(p))
         
-        # Filtr wskazujący na wartości do zaakceptowania w aktualnej iteracji
-        mask = c .* rand(size - filled_count) .* geometric.(x, p) .<= poisson.(x, l)
+        while c * rand() * geometric(x, p) > poisson(x, l)
+            x = rand(Geometric(p))
+        end
 
-        filled_now    = sum(mask)
-        filled_count += filled_now
+        result[i] = x
 
-        result[1+prev_filled_count:filled_count] = x[mask][1:filled_count-prev_filled_count]
-        prev_filled_count = filled_count
-    
     end
 
     return result
 
 end
 
-@btime [accept_reject(p, l) for _ in 1:100_000]
-samples = accept_reject_vectorized(p, l, 100_000)
+
+# Porównanie wydajności obu metod
+@btime [accept_reject(p, l) for _ in 1:10_000]
+@btime accept_reject_vectorized(p, l, 10_000)
+
+
+samples =  accept_reject_vectorized(p, l, 100_000)
 
 
 histogram(samples, normalize=:probability)
 
+
+# Testy statystyczne
 pvalue(ExactOneSampleKSTest(samples, Poisson(l)), tail=:right)
