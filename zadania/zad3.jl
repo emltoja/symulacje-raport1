@@ -1,7 +1,7 @@
 # Zadanie 3 
-
-# TODO: ZLICZANIE WYWOŁAŃ PDF(NORMAL). 
-# ZIGGURAT 107 MS VS 140 MS DLA KLASYCZNEGO (1_000_000 PRÓB)
+ 
+# ZIGGURAT 100 MS VS 90 MS DLA KLASYCZNEGO (1_000_000 PRÓB)
+# 12 WYWOŁAŃ PDF NA 100 LOSOWAŃ
 
 
 using Distributions
@@ -37,15 +37,19 @@ end
 function ziggurat(N, intervals, extr)
 
     samples = Vector{Float64}(undef, N)
+    counts = 0
 
     for i = 1:N
         x = 0.
+        counter = 0
+        num_of_runs = 0
         
         while true 
          
             x = rand(Exponential(1))
             y = sqrt(2ℯ/π) * rand() * pdf(Exponential(1), x)
             idx = findindex(x, intervals)
+            num_of_runs += 1
             
             if y > extr[idx]
                 continue
@@ -55,15 +59,17 @@ function ziggurat(N, intervals, extr)
             end
 
             if y <= 2 * pdf(Normal(0, 1), x)
+                counter += 1
                 break
             end
 
         end
 
         samples[i] = x
+        counts += counter / num_of_runs
     end
 
-    return samples
+    return (samples, counts/N)
 
 end
 
@@ -91,7 +97,8 @@ intervals, extr = steps_2(30)
 @btime accept_reject(1_000_000)
 
 
-abs_norm_samples = ziggurat(10000, intervals, extr)
+abs_norm_samples, mean_pdf_calls_rate = ziggurat(10000, intervals, extr)
+print(mean_pdf_calls_rate)
 samples = vcat(abs_norm_samples, -1 .* abs_norm_samples)
 
 histogram(samples, normalize = :pdf, legend=false)
