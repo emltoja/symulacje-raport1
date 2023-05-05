@@ -19,7 +19,7 @@ function MRG32k3a(
         x = mod((1403580seedx[2] - 810728seedx[3]), m1)
         y = mod((527612seedy[1] - 1370589seedy[3]), m2)
 
-        result[i] = mod((x - y), m1) / m1
+        result[i] = ifelse(x > y, (x - y) / (m1 + 1), (x - y + m1) / (m1 + 1))
 
         pop!(seedx); pop!(seedy)
         pushfirst!(seedx, x); pushfirst!(seedy, y)
