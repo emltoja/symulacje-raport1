@@ -49,15 +49,15 @@ end
 
 
 # Porównanie wydajności obu metod
-@btime [accept_reject(p, l) for _ in 1:10_000]
-@btime accept_reject_vectorized(p, l, 10_000)
+@benchmark [accept_reject(p, l) for _ in 1:10_000]
+@benchmark accept_reject_vectorized(p, l, 10_000)
 
 
 samples =  accept_reject_vectorized(p, l, 100_000)
 
 
 histogram(samples, normalize=:probability)
-
+scatter!(0:10, pdf.(Poisson(l), 0:10))
 
 # Testy statystyczne
 pvalue(ExactOneSampleKSTest(samples, Poisson(l)), tail=:right)
