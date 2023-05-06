@@ -5,7 +5,7 @@ using Distributions
 using BenchmarkTools
 using HypothesisTests
 using SpecialFunctions
-
+using BenchmarkPlots
 SAMPLESIZE = 100
 
 ###############################
@@ -83,12 +83,27 @@ plot(marsaglia_sorted, LinRange(0, 1, SAMPLESIZE), linetype=:steppre)
 
 inversecdf(x) = -sqrt(2) * erfcinv(2x)
 
-function invΦ(size)
+function inv(size)
     return inversecdf.(rand(size))
 end
 
-@btime invΦ(SAMPLESIZE)
+@btime inv(SAMPLESIZE)
 
 
 inversecdf_samples = invΦ(SAMPLESIZE)
 ExactOneSampleKSTest(inversecdf_samples, Normal(0, 1))
+
+
+function benchmark(size)
+    
+    suite = BenchmarkGroup()
+    for f in (boxmuller, marsaglia, randn, inv)
+        suite[string(f)] = @benchmarkable $(f)($size)
+    end
+    tune!(suite)
+    run(suite, verbose=true, samples=50)
+
+end
+
+bench_results = benchmark(100_000)
+plot(bench_results)
