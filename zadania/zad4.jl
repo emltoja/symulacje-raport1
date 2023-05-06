@@ -6,7 +6,7 @@ using BenchmarkTools
 using HypothesisTests
 using SpecialFunctions
 using BenchmarkPlots
-SAMPLESIZE = 100
+SAMPLESIZE = 10000
 
 ###############################
 # Generowanie wbudowaną funkcją

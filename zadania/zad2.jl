@@ -16,20 +16,20 @@ c = maximum([poisson(x, l) / geometric(x, p) for x in 1:2l])
 
 function accept_reject(p, l)
 
-
-    X = rand(Geometric(p))
+    x = rand(Geometric(p))
 
     if c * rand() * geometric(X, p) <= poisson(X, l)
-        return X
-    else 
-        accept_reject(p, l)
+        return x
     end
+
+    accept_reject(p, l)
+
 end
 
 
 function accept_reject_vectorized(p, l, size)
 
-    result = Vector{Int64}(undef, size)
+    result = zeros(Int64, size)
 
     for i in 1:size
 

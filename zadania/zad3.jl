@@ -99,7 +99,7 @@ intervals, extr = steps_2(30)
 
 abs_norm_samples, mean_pdf_calls_rate = ziggurat(10000, intervals, extr)
 print(mean_pdf_calls_rate)
-samples = vcat(abs_norm_samples, -1 .* abs_norm_samples)
+samples = vcat(abs_norm_samples, -abs_norm_samples)
 
 histogram(samples, normalize = :pdf, legend=false)
 
